@@ -4,6 +4,8 @@ set -e
 
 PASSWORD_ACCESS=${PASSWORD_ACCESS:-no}
 START_SYSLOGD=${START_SYSLOGD:-yes}
+KERBEROS_REALM=${KERBEROS_REALM}
+CHMOD_DIR=${CHMOD_DIR}
 
 TZ=${TZ:-UTC}
 
@@ -26,7 +28,7 @@ if [ ! -L /etc/ssh ];then
     ssh-keygen -A
 fi
 
-if [ ! -z "${KERBEROS_REALM}" ]; then
+if [ "${KERBEROS_REALM}" ]; then
     cat >/etc/krb5.conf <<EOL
 [libdefaults]
     default_realm = ${KERBEROS_REALM}
@@ -57,8 +59,10 @@ else
     echo "syslogd not started."
 fi
 
-# In case /tmp subdir is mounted for krb5cc
-find /tmp -type d -exec chmod 777 {} +
+if [ "${CHMOD_DIR}" ]; then
+    # In case /tmp subdir is mounted for krb5cc
+    find "${CHMOD_DIR}" -type d -exec chmod 777 {} +
+fi
 
 # Start sshd
 exec "$@"

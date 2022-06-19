@@ -58,6 +58,7 @@ services:
     hostname: bastion
     environment:
       PASSWORD_ACCESS: 'yes'
+      CHMOD_DIR: /tmp
       TZ: 'America/Los_Angeles'
     volumes:
       - "sssd_lib:/var/lib/sss"
@@ -89,3 +90,4 @@ Alternate to this hack is to bind mount ```/tmp``` in both the ```sssd``` contai
 * ```PASSWORD_ACCESS```: Default ```no```: Enables SSH password access using the user's password in the AD
 * ```START_SYSLOGD```: Default ```yes```: Starts the rsyslogd in the container. May be useful to turn off if you want to run only ```sshd``` using a custom command.
 * ```KERBEROS_REALM```: Default unset: The kerberos realm to set in the ```/etc/krb5.conf```. Used as the default realm when a logged in user runs ```kinit``` manually.
+* ```CHMOD_DIR```: Default unset: Setting this will cause the script to recursively ```chmod 777``` directories specified. This is useful for fixing up ```/tmp``` subdirectory dir for keberos tickets.
