@@ -36,7 +36,8 @@ services:
       SSMTP_HOST: ''
     restart: always
   sssd:
-    image: phihos/sssd-krb5-ldap
+    build:
+      context: https://github.com/sroaj/docker-sssd-krb5-ldap-public-keys.git#main
     container_name: sssd
     volumes:
       - "sssd_lib:/var/lib/sss"
@@ -47,9 +48,9 @@ services:
       LDAP_BASE_DN: 'CN=Users,DC=samdom,DC=example,DC=org'
       LDAP_BIND_DN: 'CN=bastion,CN=Users,DC=samdom,DC=example,DC=org'
       LDAP_BIND_PASSWORD: 'example-ldap-bind-password'
-      LDAP_URI: |-
-        ldaps://samba.samdom.example.org
-        krb5_ccachedir = /tmp/tickets
+      LDAP_URI: 'ldaps://samba.samdom.example.org'
+      LDAP_USER_SSH_ATTRS: 'altSecurityIdentities'
+      KERBEROS_CCACHEDIR: '/tmp/tickets'
     restart: always
   openssh-server:
     build:
@@ -58,7 +59,7 @@ services:
     hostname: bastion
     environment:
       PASSWORD_ACCESS: 'yes'
-      CHMOD_DIR: /tmp
+      KERBEROS_REALM: 'INT.SROAJSOSOTHIKUL.COM'
       TZ: 'America/Los_Angeles'
     volumes:
       - "sssd_lib:/var/lib/sss"
@@ -76,18 +77,10 @@ volumes:
   sssd_tickets:
 ```
 
-An important note to see here is that the ```krb5_ccachedir = /tmp/tickets``` is set in the ```sssd``` container via overloading the ```LDAP_URI``` argument with a multiline string. This is fragile and can break if ```phihos/sssd-krb5-ldap``` updates. 
-
-This hack, and the bind mount of ```/tmp/tickets``` between the ```sssd``` container and the ```openssh-server``` container, allows the ```openssh-server``` container to receive the kerberos ticket created in the ```sssd``` container. 
-
-This results in users who ssh-ed into the bastion to have a kerberos ticket ready to connect with other services that supports kerberos auth.
-
-Alternate to this hack is to bind mount ```/tmp``` in both the ```sssd``` container and the ```openssh-server``` container, but this does mean the ```/tmp``` directory is now shared between 2 containers.
-
 ## Parameters
 
 * ```TZ```: Default ```UTC```: Sets the timezome in the container
 * ```PASSWORD_ACCESS```: Default ```no```: Enables SSH password access using the user's password in the AD
 * ```START_SYSLOGD```: Default ```yes```: Starts the rsyslogd in the container. May be useful to turn off if you want to run only ```sshd``` using a custom command.
 * ```KERBEROS_REALM```: Default unset: The kerberos realm to set in the ```/etc/krb5.conf```. Used as the default realm when a logged in user runs ```kinit``` manually.
-* ```CHMOD_DIR```: Default unset: Setting this will cause the script to recursively ```chmod 777``` directories specified. This is useful for fixing up ```/tmp``` subdirectory dir for keberos tickets.
+* ```PUBKEY_ACCESS```: Default ```yes```: Enables SSH Public Key access using the user's public key in the AD as obtained by the sssd agent in the sssd container.

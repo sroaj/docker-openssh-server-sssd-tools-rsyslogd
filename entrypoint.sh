@@ -3,9 +3,9 @@
 set -e
 
 PASSWORD_ACCESS=${PASSWORD_ACCESS:-no}
+PUBKEY_ACCESS=${PUBKEY_ACCESS:-yes}
 START_SYSLOGD=${START_SYSLOGD:-yes}
 KERBEROS_REALM=${KERBEROS_REALM}
-CHMOD_DIR=${CHMOD_DIR}
 
 TZ=${TZ:-UTC}
 
@@ -44,10 +44,28 @@ fi
 if [ "$PASSWORD_ACCESS" == "no" ]; then
     sed -i '/^#PasswordAuthentication/c\PasswordAuthentication no' /etc/ssh/sshd_config
     sed -i '/^PasswordAuthentication/c\PasswordAuthentication no' /etc/ssh/sshd_config
-    echo "User/password ssh access is enabled."
-else
-    sed -i '/^PasswordAuthentication/c\PasswordAuthentication yes' /etc/ssh/sshd_config
     echo "User/password ssh access is disabled."
+else
+    sed -i '/^#PasswordAuthentication/c\PasswordAuthentication yes' /etc/ssh/sshd_config
+    sed -i '/^PasswordAuthentication/c\PasswordAuthentication yes' /etc/ssh/sshd_config
+    echo "User/password ssh access is enabled."
+fi
+
+if [ "$PUBKEY_ACCESS" == "no" ]; then
+    sed -i '/^#PubkeyAuthentication/c\PubkeyAuthentication no' /etc/ssh/sshd_config
+    sed -i '/^PubkeyAuthentication/c\PubkeyAuthentication no' /etc/ssh/sshd_config
+    echo "Pubkey ssh access is disabled."
+else
+    sed -i '/^#PubkeyAuthentication/c\PubkeyAuthentication yes' /etc/ssh/sshd_config
+    sed -i '/^PubkeyAuthentication/c\PubkeyAuthentication yes' /etc/ssh/sshd_config
+
+    sed -i '/^#AuthorizedKeysCommand /c\AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys' /etc/ssh/sshd_config
+    sed -i '/^AuthorizedKeysCommand /c\AuthorizedKeysCommand /usr/bin/sss_ssh_authorizedkeys' /etc/ssh/sshd_config
+
+    sed -i '/^#AuthorizedKeysCommandUser/c\AuthorizedKeysCommandUser root' /etc/ssh/sshd_config
+    sed -i '/^AuthorizedKeysCommandUser/c\AuthorizedKeysCommandUser root' /etc/ssh/sshd_config
+
+    echo "Pubkey ssh access is enabled."
 fi
 
 if [ "$START_SYSLOGD" != "no" ]; then
@@ -57,11 +75,6 @@ if [ "$START_SYSLOGD" != "no" ]; then
     { sleep 1 ; tail -F /var/log/auth.log ; } &
 else
     echo "syslogd not started."
-fi
-
-if [ "${CHMOD_DIR}" ]; then
-    # In case /tmp subdir is mounted for krb5cc
-    find "${CHMOD_DIR}" -type d -exec chmod 777 {} +
 fi
 
 # Start sshd
