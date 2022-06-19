@@ -58,7 +58,7 @@ else
 fi
 
 # In case /tmp subdir is mounted for krb5cc
-chmod -R 777 /tmp
+find /tmp -type d -exec chmod 777 {} +
 
 # Start sshd
 exec "$@"
