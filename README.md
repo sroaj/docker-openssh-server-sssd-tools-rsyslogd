@@ -75,7 +75,7 @@ volumes:
   sssd_tickets:
 ```
 
-An important note to see here is that the ```krb5_ccachedir = /tmp/tickets``` is set in the ```sssd``` container via overloading the ```LDAP_URI``` argument with a multiline string. This is fradgile and can break if ```phihos/sssd-krb5-ldap``` updates. 
+An important note to see here is that the ```krb5_ccachedir = /tmp/tickets``` is set in the ```sssd``` container via overloading the ```LDAP_URI``` argument with a multiline string. This is fragile and can break if ```phihos/sssd-krb5-ldap``` updates. 
 
 This hack, and the bind mount of ```/tmp/tickets``` between the ```sssd``` container and the ```openssh-server``` container, allows the ```openssh-server``` container to receive the kerberos ticket created in the ```sssd``` container. 
 
@@ -88,4 +88,4 @@ Alternate to this hack is to bind mount ```/tmp``` in both the ```sssd``` contai
 * ```TZ```: Default ```UTC```: Sets the timezome in the container
 * ```PASSWORD_ACCESS```: Default ```no```: Enables SSH password access using the user's password in the AD
 * ```START_SYSLOGD```: Default ```yes```: Starts the rsyslogd in the container. May be useful to turn off if you want to run only ```sshd``` using a custom command.
-* ```KERBEROS_REALM```: Default unset: The kerberos realm to set in the ```/etc/krb5.conf``` Only seems to be used as the default realm when a logged in user runs ```kinit``` manually.
+* ```KERBEROS_REALM```: Default unset: The kerberos realm to set in the ```/etc/krb5.conf```. Used as the default realm when a logged in user runs ```kinit``` manually.
