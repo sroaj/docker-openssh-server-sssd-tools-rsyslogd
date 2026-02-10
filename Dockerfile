@@ -1,5 +1,8 @@
 FROM ubuntu:noble-20260113
 # The above versions should be automatically updated by dependabot
+FROM ubuntu:latest
+# Regardless of what dependabot does, if someone manually builds this
+# repo, they should be using ubuntu:latest
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
                 sssd-tools \
