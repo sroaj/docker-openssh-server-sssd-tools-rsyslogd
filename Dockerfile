@@ -1,4 +1,5 @@
-FROM ubuntu:latest
+FROM ubuntu:noble-20260113
+# The above versions should be automatically updated by dependabot
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y \
                 sssd-tools \

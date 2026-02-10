@@ -11,7 +11,7 @@ I wanted a ssh bastion server that can auth against a samba4 AD DC.
 
 After setting https://github.com/phihos/docker-sssd-krb5-ldap up, I needed a container that ran openssh-server and sssd-tools to link up with that container.
 
-Since the bastion server will be exposed to the internet, I alo wanted fail2ban to parse the ```/var/log/auth.log``` which also required rsyslogd to be running to emit ```auth.log``` in a sane format in a non hacky way.
+Since the bastion server will be exposed to the internet, I also want ```/var/log/auth.log```  which also required rsyslogd to be running to emit ```auth.log``` in a sane format in a non hacky way.
 
 ## Usage
 
