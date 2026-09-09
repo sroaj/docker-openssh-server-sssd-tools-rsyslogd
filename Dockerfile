@@ -1,4 +1,4 @@
-FROM ubuntu:noble-20260810
+FROM ubuntu:noble-20260905
 # The above versions should be automatically updated by dependabot
 FROM ubuntu:latest
 # Regardless of what dependabot does, if someone manually builds this
